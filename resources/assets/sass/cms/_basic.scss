@@ -1,0 +1,98 @@
+// ---------------------------------------------------------------------------------------------------
+// position
+// ---------------------------------------------------------------------------------------------------
+.relative { position:relative;}
+.absolute { position:absolute;}
+
+.top-0 { top: 0px}
+
+.bottom-0 { bottom: 0px;}
+
+.left-0 { left: 0px}
+
+.right-0 { right: 0px}
+
+// ---------------------------------------------------------------------------------------------------
+// MARGIN
+// ---------------------------------------------------------------------------------------------------
+.mt-s 	{ margin-top: ceil($padding-large-vertical * 1) !important;}
+.mt-m 	{ margin-top: ceil($padding-large-vertical * 2) !important;}
+.mt-l 	{ margin-top: ceil($padding-large-vertical * 3) !important;}
+.mt-xl 	{ margin-top: ceil($padding-large-vertical * 4) !important;}
+.mt-xxl { margin-top: ceil($padding-large-vertical * 5) !important;}
+
+.mb-s 	{ margin-bottom: ceil($padding-large-vertical * 1) !important;}
+.mb-m 	{ margin-bottom: ceil($padding-large-vertical * 2) !important;}
+.mb-l 	{ margin-bottom: ceil($padding-large-vertical * 3) !important;}
+.mb-xl 	{ margin-bottom: ceil($padding-large-vertical * 4) !important;}
+.mb-xxl { margin-bottom: ceil($padding-large-vertical * 5) !important;}
+
+.ml-s 	{ margin-left: ceil($padding-large-vertical * 1) !important;}
+.ml-m 	{ margin-left: ceil($padding-large-vertical * 2) !important;}
+.ml-l 	{ margin-left: ceil($padding-large-vertical * 3) !important;}
+.ml-xl 	{ margin-left: ceil($padding-large-vertical * 4) !important;}
+.ml-xxl { margin-left: ceil($padding-large-vertical * 5) !important;}
+
+.mr-s 	{ margin-right: ceil($padding-large-vertical * 1) !important;}
+.mr-m 	{ margin-right: ceil($padding-large-vertical * 2) !important;}
+.mr-l 	{ margin-right: ceil($padding-large-vertical * 3) !important;}
+.mr-xl 	{ margin-right: ceil($padding-large-vertical * 4) !important;}
+.mr-xxl { margin-right: ceil($padding-large-vertical * 5) !important;}
+
+
+// ---------------------------------------------------------------------------------------------------
+// PADDING
+// ---------------------------------------------------------------------------------------------------
+.pt-s 	{ padding-top: ceil($padding-large-vertical * 1) !important;}
+.pt-m 	{ padding-top: ceil($padding-large-vertical * 2) !important;}
+.pt-l 	{ padding-top: ceil($padding-large-vertical * 3) !important;}
+.pt-xl 	{ padding-top: ceil($padding-large-vertical * 4) !important;}
+.pt-xxl { padding-top: ceil($padding-large-vertical * 5) !important;}
+
+.pb-s 	{ padding-bottom: ceil($padding-large-vertical * 1) !important;}
+.pb-m 	{ padding-bottom: ceil($padding-large-vertical * 2) !important;}
+.pb-l 	{ padding-bottom: ceil($padding-large-vertical * 3) !important;}
+.pb-xl 	{ padding-bottom: ceil($padding-large-vertical * 4) !important;}
+.pb-xxl { padding-bottom: ceil($padding-large-vertical * 5) !important;}
+
+.pl-s 	{ padding-left: ceil($padding-large-vertical * 1) !important;}
+.pl-m 	{ padding-left: ceil($padding-large-vertical * 2) !important;}
+.pl-l 	{ padding-left: ceil($padding-large-vertical * 3) !important;}
+.pl-xl 	{ padding-left: ceil($padding-large-vertical * 4) !important;}
+.pl-xxl { padding-left: ceil($padding-large-vertical * 5) !important;}
+
+.pr-s 	{ padding-right: ceil($padding-large-vertical * 1) !important;}
+.pr-m 	{ padding-right: ceil($padding-large-vertical * 2) !important;}
+.pr-l 	{ padding-right: ceil($padding-large-vertical * 3) !important;}
+.pr-xl 	{ padding-right: ceil($padding-large-vertical * 4) !important;}
+.pr-xxl { padding-right: ceil($padding-large-vertical * 5) !important;}
+
+// ---------------------------------------------------------------------------------------------------
+// BACKGROUND
+// ---------------------------------------------------------------------------------------------------
+.bg-black { background:black !important;}
+.bg-white { background:white !important;}
+.bg-gray-darker { background:$gray-darker !important;}
+.bg-gray-dark { background:$gray-dark !important;}
+.bg-gray-light { background:$gray-light !important;}
+.bg-gray-lighter { background:$gray-lighter !important;}
+.bg-danger { background:$brand-danger !important;}
+.bg-primary { background:$brand-primary !important;}
+
+// ---------------------------------------------------------------------------------------------------
+// TYPOGRAPHY
+// ---------------------------------------------------------------------------------------------------
+.light { font-weight: 100;}
+.thin { font-weight: 300;}
+.bold { font-weight: 700;}
+.uppercase { text-transform: uppercase;}
+
+.large { font-size: $font-size-large; }
+.small { font-size: $font-size-small; }
+
+.spacious-s { letter-spacing: 1px;}
+.spacious-m { letter-spacing: 2px;}
+.spacious-l { letter-spacing: 3px;}
+.spacious-xl { letter-spacing: 4px;}
+
+.text-white { color:#fff !important; }

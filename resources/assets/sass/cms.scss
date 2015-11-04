@@ -1,0 +1,22 @@
+@import "cms/bootstrap/bootstrap";
+@import "cms/basic";
+@import "cms/variables";
+
+.app {
+    color: red;
+}
+
+* { font-weight: 300; }
+
+// ------------------------------------------------------------------------------------
+// NAVBAR
+// ------------------------------------------------------------------------------------
+.navbar {
+	font-weight: 300;
+}
+
+.dropdown-menu {
+	a {
+		font-weight: 300 !important;
+	} 
+}

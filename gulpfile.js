@@ -12,5 +12,9 @@ var elixir = require('laravel-elixir');
  */
 
 elixir(function(mix) {
-    mix.sass('app.scss');
+    mix.sass('cms.scss')
+		.scripts(['jquery.inputmask.bundle.js'], 'public/js/cms.js')
+    	.version(['public/css/cms.css', 'public/js/cms.js'])
+    	.copy('resources/assets/font', 'public/font')
+		.copy('resources/assets/images', 'public/images');
 });
