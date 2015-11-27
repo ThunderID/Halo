@@ -14,7 +14,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         //
-        \DB::connection('mongodb')->enableQueryLog();
+        // \DB::connection('mongodb')->enableQueryLog();
         error_reporting(E_ERROR);
     }
 

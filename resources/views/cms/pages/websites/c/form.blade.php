@@ -18,56 +18,51 @@
 
 			<div class="row">
 				<div class="col-xs-12 mb-s col-sm-12">
-					Website Name
-					<input value="{{ Input::old('name', $website->name)}}" name="name" type="text" class="form-control" id="" placeholder="">
+					Website Name {!! Form::text('name', $website->name, ['class' => 'form-control']) !!}
 				</div>
 				<div class="col-xs-12 mb-s col-sm-6">
-					URL
-					<input value="{{ Input::old('url', $website->url)}}" name="url" type="text" class="form-control" id="" placeholder="http://">
+					URL {!! Form::text('url', $website->url, ['class' => 'form-control','placeholder' => 'http://']) !!}
 				</div>
 				<div class="col-xs-12 mb-s col-sm-6">
-					Launched At
-					<input type="text" name="launched_at" id="input" class="form-control" value="{{ Input::old('launched_at', $website->launched_at ? $website->launched_at->format('d/m/Y') : '' )}}" required="required" title="" data-inputmask="'alias': 'date'">
+					Launched At {!! Form::text('launched_at', $website->launched_at ? $website->launched_at->format('d/m/Y') : null, ['class' => 'form-control','placeholder' => 'dd/mm/yyyy', 'data-inputmask' => "'alias':'date'"]) !!}
 				</div>
 
 				{{-- SOCIAL MEDIA --}}
 				<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+					<hr>
 					<h5>SOCIAL MEDIA</h5>
+					<hr>
 				</div>
 
 				<div class="col-xs-12 mb-s col-sm-4">
-					Facebook
-					<input value="{{ Input::old('facebook', $website->facebook)}}" name="facebook" type="text" class="form-control" id="" placeholder="">
+					Facebook {!! Form::text('facebook', $website->facebook, ['class' => 'form-control']) !!}
 				</div>
 
 				<div class="col-xs-12 mb-s col-sm-4">
-					Twitter
-					<input value="{{ Input::old('twitter', $website->twitter)}}" name="twitter" type="text" class="form-control" id="" placeholder="">
+					Twitter {!! Form::text('twitter', $website->twitter, ['class' => 'form-control']) !!}
 				</div>
 
 				<div class="col-xs-12 mb-s col-sm-4">
-					Instagram
-					<input value="{{ Input::old('instagram', $website->instagram)}}" name="instagram" type="text" class="form-control" id="" placeholder="">
+					Instagram {!! Form::text('instagram', $website->instagram, ['class' => 'form-control']) !!}
 				</div>
 
 				{{-- LOGO --}}
 				<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+					<hr>
 					<h5>LOGO</h5>
+					<hr>
 				</div>
 
 				<div class="col-xs-12 mb-s col-sm-4">
-					Small Logo
-					<input value="{{ Input::old('small_logo', $website->small_logo)}}" name="small_logo" type="text" class="form-control" id="" placeholder="http://drive.thunder.id/">
+					Small {!! Form::text('image_s', $website->small_images->first()->path, ['class' => 'form-control','placeholder' => 'http://']) !!}
 				</div>
 
 				<div class="col-xs-12 mb-s col-sm-4">
-					Medium Logo
-					<input value="{{ Input::old('medium_logo', $website->medium_logo)}}" name="medium_logo" type="text" class="form-control" id="" placeholder="http://drive.thunder.id/">
+					Medium {!! Form::text('image_m', $website->medium_images->first()->path, ['class' => 'form-control','placeholder' => 'http://']) !!}
 				</div>
 
 				<div class="col-xs-12 mb-s col-sm-4">
-					Large Logo
-					<input value="{{ Input::old('large_logo', $website->large_logo)}}" name="large_logo" type="text" class="form-control" id="" placeholder="http://drive.thunder.id/">
+					Large {!! Form::text('image_l', $website->large_images->first()->path, ['class' => 'form-control','placeholder' => 'http://']) !!}
 				</div>
 			</div>
 		</div>

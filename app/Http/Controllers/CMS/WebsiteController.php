@@ -3,143 +3,44 @@
 namespace App\Http\Controllers\CMS;
 
 use Input;
-use \App\Models\Website;
-use \App\Jobs\StoreWebsite;
-use \App\Jobs\DeleteWebsite;
+use \App\Models\Website as Model;
+use \App\Jobs\StoreWebsite as StoreCommand;
+use \App\Jobs\DeleteWebsite as DeleteCommand;
 
-class WebsiteController extends Controller { 
+class WebsiteController extends CrudController { 
 
 	function __construct() 
 	{
+		$this->crud_name = 'website';
+		$this->model = new Model;
+		$this->filters = ['name'];
+		$this->store_command = '\App\Jobs\StoreWebsite';
+		$this->delete_command = '\App\Jobs\DeleteWebsite';
+
 		parent::__construct();
-
-		$this->views['pages'] = $this->views['pages'] . 'websites.';
 	}
 
-	function getIndex()
+	public function getIndex()
 	{
-		// ------------------------------------------------------------------------------------
-		// GET FILTERS
-		// ------------------------------------------------------------------------------------
-		$filters = Input::only('name');
+		$view = parent::getIndex();
 
 		// ------------------------------------------------------------------------------------
-		// GET WEBSITES LIST
+		// GET LIST
 		// ------------------------------------------------------------------------------------
-		$websites = Website::name($filters['name'])->orderby('name')->paginate(25);
+		$this->layout->main->data = Model::name('*'.$this->layout->main->filters['name'].'*')->orderby('name')->paginate(25);
 
 		// ------------------------------------------------------------------------------------
 		// VIEW
 		// ------------------------------------------------------------------------------------
-		$this->layout->main 			= view($this->views['pages'] . 'index');
-		$this->layout->main->views 		= $this->views;
-		$this->layout->main->websites	= $websites;
-		$this->layout->main->filters	= $filters;
-		
 		return $this->layout;
 	}
 
-	function getCreate(Website $website = null)
+	public function postStore($id)
 	{
-		if (!$website)
-		{
-			$website = new Website;
-		}
-		// ------------------------------------------------------------------------------------
-		// GET WEBSITES LIST
-		// ------------------------------------------------------------------------------------
-
-		// ------------------------------------------------------------------------------------
-		// VIEW
-		// ------------------------------------------------------------------------------------
-		$this->layout->main 			= view($this->views['pages'] . 'create');
-		$this->layout->main->views 		= $this->views;
-		$this->layout->main->website 	= $website;
-		
-		return $this->layout;
-	}
-
-	function getEdit($id)
-	{
-		$website = Website::findorfail($id);
-
-		return $this->getCreate($website);
-	}
-
-	function getShow($id)
-	{
-		// ------------------------------------------------------------------------------------
-		// GET WEBSITE
-		// ------------------------------------------------------------------------------------
-		$website = Website::findorfail($id);
-
-		// ------------------------------------------------------------------------------------
-		// VIEW
-		// ------------------------------------------------------------------------------------
-		$this->layout->main 			= view($this->views['pages'] . 'show');
-		$this->layout->main->views 		= $this->views;
-		$this->layout->main->website	= $website;
-		
-		return $this->layout;
-	}
-
-	function postStore($id = null)
-	{
-		// ------------------------------------------------------------------------------------
-		// CHECK ID
-		// ------------------------------------------------------------------------------------
-		if ($id)
-		{
-			$website = Website::findorfail($id);
-		}
-		else
-		{
-			$website = new Website;
-		}
-
-		// ------------------------------------------------------------------------------------
-		// GET INPUT
-		// ------------------------------------------------------------------------------------
 		$input = Input::all();
 		$input['launched_at'] = \Carbon\Carbon::createFromFormat('d/m/Y', $input['launched_at']);
 
-		// ------------------------------------------------------------------------------------
-		// CREATE WEBSITE
-		// ------------------------------------------------------------------------------------
-		$js = $this->dispatch(new StoreWebsite($input, $website->id));
-
-
-		// ------------------------------------------------------------------------------------
-		// REDIRECT
-		// ------------------------------------------------------------------------------------
-		if ($js->isSuccess())
-		{
-			return redirect()->route('cms.website');
-		}
-		else
-		{
-			return redirect()->back()->withErrors($js->getData())->withInput();
-		}
+		return parent::postStore($id, $input);
 	}
 
-	function putDelete($id)
-	{
-		// ------------------------------------------------------------------------------------
-		// GET WEBSITES LIST
-		// ------------------------------------------------------------------------------------
-		$js = $this->dispatch(new DeleteWebsite($id));
-
-		// ------------------------------------------------------------------------------------
-		// VIEW
-		// ------------------------------------------------------------------------------------
-		if ($js->isFail())
-		{
-			return redirect()->back()->withErrors($js->getData());
-		}
-		else
-		{
-			$request->session()->flash('alert_success', 'Website ' . $js->getData()->name . ' is deleted');
-			return redirect()->route('cms.website')->with('alert_success');
-		}
-	}
 }

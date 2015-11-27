@@ -22,7 +22,7 @@ abstract class Controller extends \App\Http\Controllers\Controller {
 		// ASSIGN CONTENT
 		$this->layout->content 			= view($this->views['template'] . 'v1_content');
 		$this->layout->content->views 	= $this->views;
-		$this->layout->content->websites= Website::orderby('name')->get();
+		// $this->layout->content->websites= Website::orderby('name')->get();
 	}
 
 }

@@ -15,7 +15,11 @@ class CreateImage extends Migration
         Schema::create('images', function (Blueprint $table) {
             $table->increments('id');
             $table->string('image_type');
-            $table->string('image_id');
+            $table->integer('image_id')->unsigned();
+            $table->string('name');
+            $table->string('path');
+            $table->string('title');
+            $table->string('description');
             $table->timestamps();
 
             $table->index(['image_type', 'image_id']);

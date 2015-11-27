@@ -9,25 +9,27 @@ use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 
-class User extends BaseModel implements AuthenticatableContract,
-									AuthorizableContract,
-									CanResetPasswordContract
+class User extends BaseModel 
+						// implements AuthenticatableContract,
+						// 			AuthorizableContract,
+						// 			CanResetPasswordContract
 {
-	use Authenticatable, Authorizable, CanResetPassword;
+	// use Authenticatable, Authorizable, CanResetPassword, 
+	use HasImages, Authoring, Managing;
 
 	/**
 	 * The database table used by the model.
 	 *
 	 * @var string
 	 */
-	protected $table = 'v2_users';
+	protected $table = 'users';
 
 	/**
 	 * The attributes that are mass assignable.
 	 *
 	 * @var array
 	 */
-	protected $fillable = ['name', 'email', 'username', 'password', 'group', 'role'];
+	protected $fillable = ['name', 'username', 'email', 'password'];
 
 	/**
 	 * The attributes excluded from the model's JSON form.
@@ -36,7 +38,7 @@ class User extends BaseModel implements AuthenticatableContract,
 	 */
 	protected $hidden = ['password', 'remember_token'];
 	public $timestamps = true;
-	// protected $dates  = ['created_at', 'updated_at'];
+	protected $dates  = ['created_at', 'updated_at', 'start_at', 'end_at'];
 
 
 	// –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––

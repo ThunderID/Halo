@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
-use Jenssegers\Mongodb\Model;
+// use Jenssegers\Mongodb\Model;
+use Illuminate\Database\Eloquent\Model;
 use \App\Models\ErrorTrait;
 
 
-class BaseModel extends Model {
+abstract class BaseModel extends Model {
+
+    protected $connection = 'mysql';
 
 	use ErrorTrait;
 

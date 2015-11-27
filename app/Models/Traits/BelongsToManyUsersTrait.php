@@ -1,6 +1,6 @@
 <?php 
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Support\MessageBag;
 
@@ -14,10 +14,10 @@ trait BelongsToManyUsersTrait {
 	// --------------------------------------------------------------------
 	// RELATIONS
 	// --------------------------------------------------------------------
-	public function users()
-	{
-		return $this->belongsToMany(__NAMESPACE__ . '\User');
-	}
+	// public function users()
+	// {
+	// 	return $this->belongsToMany(__NAMESPACE__ . '\User');
+	// }
 
 	// --------------------------------------------------------------------
 	// SCOPE
@@ -30,9 +30,7 @@ trait BelongsToManyUsersTrait {
 		}
 		else
 		{
-			return $q->whereHas('users', function($q) use ($v) {
-				$q->whereIn('id', is_array($v) ? $v : [$v]);
-			});
+			return $q->whereIn('users', (is_array($v) ? $v : [$v]));
 		}
 	}
 

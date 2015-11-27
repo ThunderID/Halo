@@ -29,10 +29,27 @@ bg-grey
 @stop
 
 @section('js')
+{!! Html::script(asset('plugins/redactor/redactor.js')) !!}
+{!! Html::style(asset('plugins/redactor/redactor.css') )!!}
+
+{!! Html::script(asset('plugins/select2/select2.min.js')) !!}
 <script>
 	$(document).ready(function() {
-			// INPUT MASK
-			$("input").inputmask();
+		// INPUT MASK
+		$("input").inputmask();
+
+		// WYSIWYG
+		$('.wysiwyg').redactor({
+			minHeight : $(this).attr('data-height') ? $(this).attr('data-height') + 'px' : 500,
+			toolbarFixed: true,
+			dir: '/images/'
 		});
+
+		// TAGS
+		$('.select2').select2();
+		$('.select2-tags').select2({
+			tags: true
+		});
+	});
 </script>
 @stop

@@ -17,6 +17,9 @@ class CreateWebsite extends Migration
             $table->string('name');
             $table->string('url');
             $table->date('launched_at');
+            $table->string('facebook');
+            $table->string('twitter');
+            $table->string('instagram');
             $table->timestamps();
 
             $table->unique('url');
