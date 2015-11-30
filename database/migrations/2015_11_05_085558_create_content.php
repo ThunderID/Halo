@@ -18,8 +18,11 @@ class CreateContent extends Migration
             $table->string('slug');
             $table->text('summary');
             $table->text('content');
-            $table->datetime('published_at');
+            $table->timestamp('published_at');
             $table->timestamps();
+
+            $table->index('slug');
+            $table->index('published_at');
         });
     }
 

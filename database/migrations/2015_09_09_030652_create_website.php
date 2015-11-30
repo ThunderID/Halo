@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateImage extends Migration
+class CreateWebsite extends Migration
 {
     /**
      * Run the migrations.
@@ -12,17 +12,14 @@ class CreateImage extends Migration
      */
     public function up()
     {
-        Schema::create('images', function (Blueprint $table) {
+        Schema::create('websites', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('image_type');
-            $table->integer('image_id')->unsigned();
             $table->string('name');
-            $table->string('path');
-            $table->string('title');
-            $table->string('description');
+            $table->string('url');
+            $table->date('launched_at');
             $table->timestamps();
 
-            $table->index(['image_type', 'image_id']);
+            $table->unique('url');
         });
     }
 
@@ -33,6 +30,6 @@ class CreateImage extends Migration
      */
     public function down()
     {
-        Schema::drop('images');
+        Schema::drop('websites');
     }
 }

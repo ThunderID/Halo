@@ -7,16 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 use \App\Models\ErrorTrait;
 
 
-abstract class BaseModel extends Model {
+abstract class BaseModel extends Model implements IValidatable {
 
     protected $connection = 'mysql';
 
 	use ErrorTrait;
-
-	static function boot()
-	{
-		parent::boot();
-		Static::observe(new BaseObserver);
-	}
-	
 }

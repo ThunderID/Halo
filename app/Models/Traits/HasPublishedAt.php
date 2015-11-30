@@ -4,51 +4,47 @@ namespace App\Models;
 
 use Illuminate\Support\MessageBag;
 
-trait BelongsToManyContents {
+trait HasPublishedAt {
 
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 	// BOOT
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	static function bootBelongsToManyContents()
+	static function bootHasPublishedAt()
 	{
-	}
-
-	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	// RELATION
-	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	function contents()
-	{
-		return $this->belongsToMany(__NAMESPACE__ . '\Content');
+		Static::observe(new HasPublishedAtObserver);
 	}
 
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 	// 
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	function scopeOfContentByName($q, $v)
+	static function scopePublished($q, $v = null)
 	{
 		if (!$v)
-		{
-			return $q;
+		{	
+			return $q->where('published_at', '!=', '0000-00-00 00:00:00');
 		}
 		else
 		{
-			return $q->whereHas('contents', function($q) use ($v) { 
-				$q->whereIn(with(new \App\Models\Content)->getTable() . '.name', (is_array($v) ? $v : [$v]));
-			});
+			return $q->where('published_at', '<=', \Carbon\Carbon::parse($v))
+					->where('published_at', '!=', '0000-00-00 00:00:00');
 		}
 	}
 
-	function scopeOfContentBySlug($q, $v)
+	static function scopeUpcoming($q, $v = null)
 	{
 		if (!$v)
-		{
-			return $q;
+		{	
+			return $q->where('published_at', '>', \Carbon\Carbon::now());
 		}
 		else
 		{
-			return $q->whereHas('contents', function($q) use ($v) { 
-				$q->whereIn(with(new \App\Models\Content)->getTable() . '.slug', (is_array($v) ? $v : [$v]));
-			});
+			return $q->where('published_at', '<=', \Carbon\Carbon::parse($v))
+					->where('published_at', '!=', '0000-00-00 00:00:00');
 		}
+	}
+
+	static function scopeDraft($q)
+	{
+		return $q->where('published_at', '=', '0000-00-00 00:00:00');
 	}
 }

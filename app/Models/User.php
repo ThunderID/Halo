@@ -8,42 +8,38 @@ use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Validator;
 
-class User extends BaseModel 
-						// implements AuthenticatableContract,
-						// 			AuthorizableContract,
-						// 			CanResetPasswordContract
+class User extends BaseModel implements AuthenticatableContract,
+									AuthorizableContract,
+									CanResetPasswordContract
 {
-	// use Authenticatable, Authorizable, CanResetPassword, 
-	use HasImages, Authoring, Managing;
+	use Authenticatable, Authorizable, CanResetPassword, HasName, HasImages, BelongsToManyContents;
 
-	/**
-	 * The database table used by the model.
-	 *
-	 * @var string
-	 */
 	protected $table = 'users';
-
-	/**
-	 * The attributes that are mass assignable.
-	 *
-	 * @var array
-	 */
 	protected $fillable = ['name', 'username', 'email', 'password'];
-
-	/**
-	 * The attributes excluded from the model's JSON form.
-	 *
-	 * @var array
-	 */
 	protected $hidden = ['password', 'remember_token'];
 	public $timestamps = true;
-	protected $dates  = ['created_at', 'updated_at', 'start_at', 'end_at'];
+	protected $dates  = ['created_at', 'updated_at'];
 
+	public static $name_field = 'name';
+	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+	// BOOT
+	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––	
+	static function boot()
+	{
+		parent::boot();
 
-	// –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	// SCOPE
-	// –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+		Static::observe(new UserObserver);
+	}
+
+	// ----------------------------------------------------------------------
+	// RELATIONS
+	// ----------------------------------------------------------------------
+
+	// ----------------------------------------------------------------------
+	// SCOPES
+	// ----------------------------------------------------------------------
 	public function scopeUsername($q, $v = null)
 	{
 		if (!$v)
@@ -80,9 +76,9 @@ class User extends BaseModel
 		}
 	}
 
-	// –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	// mutator
-	// –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+	// ----------------------------------------------------------------------
+	// MUTATORS
+	// ----------------------------------------------------------------------
 	public function setUsernameAttribute($v)
 	{
 		$this->attributes['username'] = strtolower($v);
@@ -92,4 +88,32 @@ class User extends BaseModel
 	{
 		$this->attributes['email'] = strtolower($v);
 	}
+
+	// ----------------------------------------------------------------------
+	// ACCESSORS
+	// ----------------------------------------------------------------------
+
+	// ----------------------------------------------------------------------
+	// FUNCTIONS
+	// ----------------------------------------------------------------------
+	static function validate($model)
+	{
+		$rules['name']       				= ['required'];
+		$rules['username']      			= ['min:3'];
+		$rules['email']     	 			= ['required', 'email'];
+		$rules['password']      			= ['required', 'min:8'];
+
+		$validator = Validator::make($model->toArray() + ['password' => $model->password], $rules);
+
+		if ($validator->fails())
+		{
+			$model->setErrors($validator->messages());
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
+
 }

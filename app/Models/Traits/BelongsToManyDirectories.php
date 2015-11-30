@@ -4,53 +4,51 @@ namespace App\Models;
 
 use Illuminate\Support\MessageBag;
 
-trait HasSocialMedia {
-
-	static function bootHasSocialMedia()
-	{
-
-	}
-
-	// --------------------------------------------------------------------
-	// SCOPE
-	// --------------------------------------------------------------------
+trait BelongsToManyDirectories {
 
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	// FB
+	// BOOT
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	function getFacebookAttribute()
+	static function bootBelongsToManyDirectories()
 	{
-		return $this->attributes['social_media']['facebook'];
-	}
-
-	function setFacebookAttribute($v)
-	{
-		$this->attributes['social_media']['facebook'] = $v;
 	}
 
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	// Twitter
+	// RELATION
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	function getTwitterAttribute()
+	function directories()
 	{
-		return $this->attributes['social_media']['twitter'];
-	}
-
-	function setTwitterAttribute($v)
-	{
-		$this->attributes['social_media']['twitter'] = $v;
+		return $this->belongsToMany(__NAMESPACE__ . '\Directory')
 	}
 
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	// IG
+	// 
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	function getInstagramAttribute()
+	function scopeOfDirectoryByName($q, $v)
 	{
-		return $this->attributes['social_media']['instagram'];
+		if (!$v)
+		{
+			return $q;
+		}
+		else
+		{
+			return $q->whereHas('directories', function($q) use ($v) { 
+				$q->whereIn(with(new \App\Models\Directory)->getTable() . '.name', (is_array($v) ? $v : [$v]));
+			});
+		}
 	}
 
-	function setInstagramAttribute($v)
+	function scopeOfDirectoryBySlug($q, $v)
 	{
-		$this->attributes['social_media']['instagram'] = $v;
+		if (!$v)
+		{
+			return $q;
+		}
+		else
+		{
+			return $q->whereHas('directories', function($q) use ($v) { 
+				$q->whereIn(with(new \App\Models\Directory)->getTable() . '.slug', (is_array($v) ? $v : [$v]));
+			});
+		}
 	}
 }

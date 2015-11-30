@@ -2,21 +2,17 @@
 
 namespace App\Models;
 
-use Validator;
-
-
-class Website extends BaseModel
+class Directory extends BaseModel
 {
-	use HasName, HasImages, Publishabled;
+	use HasName, HasSlug, HasImages, HasPublishedAt, Publishable, Addressable, Taggable, BelongsToManyContents, BelongsToUser;
 
-	//
-	protected $table 		= 'websites';
 	protected $fillable 	= 	[
-									'name', 'url', 'launched_at'
+									'title', 'slug', 'summary', 'content', 'published_at'
 								]; 
-	protected $dates		= [ 'created_at', 'deleted_at', 'launched_at'];
+	protected $hidden		= [ ];
+	protected $dates		= [ 'created_at', 'deleted_at', 'published_at'];
 
-	static public $name_field	= 'name';
+	public static $name_field	= 'title';
 
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 	// BOOT
@@ -25,7 +21,7 @@ class Website extends BaseModel
 	{
 		parent::boot();
 
-		Static::observe(new WebsiteObserver);
+		Static::observe(new DirectoryObserver);
 	}
 
 	// ----------------------------------------------------------------------
@@ -49,9 +45,11 @@ class Website extends BaseModel
 	// ----------------------------------------------------------------------
 	static function validate($model)
 	{
-		$rules['name']			= ['required'];
-		$rules['url']			= ['required', 'url'];
-		$rules['launched_at']	= ['date'];
+		$rules['title']			= ['required'];
+		$rules['slug']			= ['required', 'unique:' . $model->getTable() . ',slug,' . $model->id ];
+		$rules['summary']		= ['required'];
+		$rules['content']		= ['required'];
+		$rules['published_at']	= ['date'];
 
 		$validator = Validator::make($model->toArray(), $rules);
 

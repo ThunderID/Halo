@@ -2,20 +2,17 @@
 
 namespace App\Models;
 
-class Image extends BaseModel
+class Address extends BaseModel
 {
-	use hasName;
-
+	use HasImages;
     //
 	protected $table = 'images';
 	protected $fillable = [
-							'name',
-							'title',
-							'path', 
-							'description', 
+							'road',
+							'city',
+							'longitude',
+							'latitude'
 						];
-
-	static protected $name_field	= 'name';
 
 	// ----------------------------------------------------------------------
 	// RELATIONS
@@ -24,13 +21,13 @@ class Image extends BaseModel
 	{
 		parent::boot();
 
-		Static::observe(new ImageObserver);
+		Static::observe(new AddressObserver);
 	}
 
 	// ----------------------------------------------------------------------
 	// RELATIONS
 	// ----------------------------------------------------------------------
-	function image()
+	function addressable()
 	{
 		return $this->morphTo();
 	}
@@ -52,10 +49,10 @@ class Image extends BaseModel
 	// ----------------------------------------------------------------------
 	static function validate($model)
 	{
-		$rules['name']		= ['required', 'in:sm,md,lg'];
-		$rules['path']		= ['required'];
-		$rules['title']		= ['max:255'];
-		$rules['description'] = [''];
+		$rules['road']		= ['required'];
+		$rules['city']		= ['required'];
+		$rules['longitude']		= ['numeric'];
+		$rules['latitude']		= ['numeric'];
 
 		$validator = Validator::make($model->toArray(), $rules);
 

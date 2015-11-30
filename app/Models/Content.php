@@ -4,45 +4,63 @@ namespace App\Models;
 
 class Content extends BaseModel
 {
-	use BelongsToUser, HasImages, BelongsToManyTags, BelongsToManyWebsites, HasLogs, Authored;
+	use HasName, HasSlug, HasImages, HasPublishedAt, Publishable, Taggable, BelongsToManyDirectories, BelongsToUser;
 
-	protected $table		= 'contents';
 	protected $fillable 	= 	[
-									'title', 'slug', 'summary', 'content', 'published_at',
+									'title', 'slug', 'summary', 'content', 'published_at'
 								]; 
 	protected $hidden		= [ ];
-	protected $dates		= [ 'created_at', 'deleted_at', 'published_at' ];
-	public $timestamps 		= true;
+	protected $dates		= [ 'created_at', 'deleted_at', 'published_at'];
+
+	public static $name_field	= 'title';
 
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	// SCOPE
-	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	function scopeTitle($q, $v=null)
+	// BOOT
+	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––	
+	static function boot()
 	{
-		if (is_null($v) || $v == "**")
+		parent::boot();
+
+		Static::observe(new ContentObserver);
+	}
+
+	// ----------------------------------------------------------------------
+	// RELATIONS
+	// ----------------------------------------------------------------------
+
+	// ----------------------------------------------------------------------
+	// SCOPES
+	// ----------------------------------------------------------------------
+
+	// ----------------------------------------------------------------------
+	// MUTATORS
+	// ----------------------------------------------------------------------
+
+	// ----------------------------------------------------------------------
+	// ACCESSORS
+	// ----------------------------------------------------------------------
+
+	// ----------------------------------------------------------------------
+	// FUNCTIONS
+	// ----------------------------------------------------------------------
+	static function validate($model)
+	{
+		$rules['title']			= ['required'];
+		$rules['slug']			= ['required', 'unique:' . $model->getTable() . ',slug,' . $model->id ];
+		$rules['summary']		= ['required'];
+		$rules['content']		= ['required'];
+		$rules['published_at']	= ['date'];
+
+		$validator = Validator::make($model->toArray(), $rules);
+
+		if ($validator->fails())
 		{
-			return $q;
+			$model->setErrors($validator->messages());
+			return false;
 		}
 		else
 		{
-			return $q->where('title', 'like', $v);
+			return true;
 		}
 	}
-
-	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	// MUTATOR
-	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	function setSummaryAttribute($v)
-	{
-		$this->attributes['summary'] = strip_tags($v);
-	}
-
-	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	// ACCESSOR
-	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	function getNameAttribute()
-	{
-		return $this->attributes['title'];
-	}
-
 }

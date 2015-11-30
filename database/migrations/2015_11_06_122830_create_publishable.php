@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateContentWebsite extends Migration
+class CreatePublishable extends Migration
 {
     /**
      * Run the migrations.
@@ -12,13 +12,14 @@ class CreateContentWebsite extends Migration
      */
     public function up()
     {
-        Schema::create('content_website', function (Blueprint $table) {
+        Schema::create('publishable', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('content_id')->unsigned();
             $table->integer('website_id')->unsigned();
+            $table->string('publishable_type');
+            $table->integer('publishable_id')->unsigned();
 
-            $table->unique(['content_id', 'website_id']);
-            $table->index(['website_id', 'content_id']);
+            $table->index(['publishable_type', 'publishable_id', 'website_id']);
+            $table->index(['website_id', 'publishable_type', 'publishable_id']);
         });
     }
 
@@ -29,6 +30,6 @@ class CreateContentWebsite extends Migration
      */
     public function down()
     {
-        Schema::drop('content_website');
+        Schema::drop('publishable');
     }
 }

@@ -4,24 +4,31 @@ namespace App\Models;
 
 use Illuminate\Support\MessageBag;
 
-trait HasImages {
+trait HasName {
 
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 	// BOOT
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	static function bootHasImages()
+	static function bootHasName()
 	{
-		Static::observe(new HasImagesObserver);
+		if (!Static::$name_field)
+		{
+			throw new Exception(__CLASS__ . ' need $name_field set', 1);
+		}
 	}
 
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 	// 
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	function getImage($name)
+	static function scopeName($q, $v = null)
 	{
-		if ($this->images->count())
+		if (!is_null($v) || $v == "**")
+		{	
+			return $q;
+		}
+		else
 		{
-			return $this->images->where('name', $name)->first();
+			return $q->where(Static::$name_field, 'like', str_replace('*', '%', $v));
 		}
 	}
 }

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use \App\Models\User;
 
 class UserTableSeeder extends Seeder
 {
@@ -12,7 +13,8 @@ class UserTableSeeder extends Seeder
 	public function run()
 	{
 		//
-		$user->full([
+		$user = new User;
+		$user->fill([
 				'name'			=> 'Erick Mo',
 				'email'			=> 'mo@thunderlab.id',
 				'password'		=> '123123123'

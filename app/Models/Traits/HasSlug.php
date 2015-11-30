@@ -4,24 +4,28 @@ namespace App\Models;
 
 use Illuminate\Support\MessageBag;
 
-trait HasImages {
+trait HasSlug {
 
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 	// BOOT
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	static function bootHasImages()
+	static function bootHasSlug()
 	{
-		Static::observe(new HasImagesObserver);
+		Static::observe(new SlugGeneratorObserver);
 	}
 
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 	// 
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	function getImage($name)
+	static function scopeSlug($q, $v = null)
 	{
-		if ($this->images->count())
+		if (!is_null($v) || $v == "**")
+		{	
+			return $q;
+		}
+		else
 		{
-			return $this->images->where('name', $name)->first();
+			return $q->where('slug', 'like', str_replace('*', '%', $v));
 		}
 	}
 }

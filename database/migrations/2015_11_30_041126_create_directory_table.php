@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateTag extends Migration
+class CreateDirectoryTable extends Migration
 {
     /**
      * Run the migrations.
@@ -12,13 +12,17 @@ class CreateTag extends Migration
      */
     public function up()
     {
-        Schema::create('tags', function (Blueprint $table) {
+        Schema::create('directories', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name');
+            $table->string('title');
             $table->string('slug');
+            $table->text('summary');
+            $table->text('content');
+            $table->timestamp('published_at');
             $table->timestamps();
 
-            $table->index('name');
+            $table->index('slug');
+            $table->index('published_at');
         });
     }
 
@@ -29,6 +33,6 @@ class CreateTag extends Migration
      */
     public function down()
     {
-        Schema::drop('tags');
+        Schema::drop('directories');
     }
 }

@@ -11,4 +11,7 @@
 |
 */
 
-include 'routes_cms.php';
+get('/', function(){
+	\App\Models\Website::get();
+});
+// include 'routes_cms.php';
