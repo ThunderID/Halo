@@ -11,7 +11,7 @@ trait Taggable {
 
 	}
 
-	function taggable()
+	function tags()
 	{
 		return $this->morphToMany(__NAMESPACE__ . '\Tag', 'taggable');
 	}

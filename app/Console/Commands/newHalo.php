@@ -77,9 +77,9 @@ class newHalo extends Command
 	{
 		Website::truncate();
 
-		$s_image = new Image(['name' => 'small', 'path' => 'http://drive.thunder.id', 'title' => 'Logo', 'description' => '']);
-		$m_image = new Image(['name' => 'medium', 'path' => 'http://drive.thunder.id', 'title' => 'Logo', 'description' => '']);
-		$l_image = new Image(['name' => 'large', 'path' => 'http://drive.thunder.id', 'title' => 'Logo', 'description' => '']);
+		$s_image = new Image(['name' => 'sm', 'path' => 'http://drive.thunder.id', 'title' => 'Logo', 'description' => '']);
+		$m_image = new Image(['name' => 'md', 'path' => 'http://drive.thunder.id', 'title' => 'Logo', 'description' => '']);
+		$l_image = new Image(['name' => 'lg', 'path' => 'http://drive.thunder.id', 'title' => 'Logo', 'description' => '']);
 
 		$website = new Website(['name' 			=> 'HaloMalang', 
 								'url'			=> 'http://halomalang.com', 
@@ -106,6 +106,8 @@ class newHalo extends Command
 
 		// get old articles
 		User::truncate();
+
+		DB::connection('mysql')->table('works')->truncate();
 		DB::connection('mongodb')->collection($old_collection)->chunk(1000, function($data) use ($new_collection, $website) {
 
 			foreach ($data as $x)
@@ -119,7 +121,7 @@ class newHalo extends Command
 
 				if ($user->save())
 				{
-					$user->managing()->attach($website, ['start_at' => \Carbon\Carbon::now(), 'end_at' => null, 'role' => 'writer']);
+					$user->works()->attach($website, ['start_at' => \Carbon\Carbon::now(), 'end_at' => null, 'role' => 'writer']);
 				}
 			}
 		});
@@ -132,7 +134,7 @@ class newHalo extends Command
 
 		if ($user->save())
 		{
-			$user->managing()->attach($website, ['start_at' => \Carbon\Carbon::now(), 'end_at' => null, 'role' => 'administrator']);
+			$user->works()->attach($website, ['start_at' => \Carbon\Carbon::now(), 'end_at' => null, 'role' => 'super']);
 		}
 	}
 
@@ -145,6 +147,8 @@ class newHalo extends Command
 		{
 			$users[$user['username']] = $user;
 		}
+
+		Content::truncate();
 
 		// get old articles
 		DB::connection('mongodb')->collection('posts')->where('category', 'regex','/news/i')->chunk(1000, function($data) use ($new_collection, $users, $website) {
@@ -203,11 +207,12 @@ class newHalo extends Command
 							'published_at' 		=> date('Y-m-d H:i:s', $x['tgl_published']->sec),
 							'created_at' 		=> $x['tgl'],
 							'updated_at' 		=> $x['tgl'],
+							'user_id'			=> array_key_exists($x['author'], $users) ? $users[$x['author']]->id : $users['dita']->id,
 						]);
 
 					if (!$news->save())
 					{
-						print_r($news->toArray());
+						print_r($news->toArray());	
 						dd($news->getErrors());
 					}
 					
@@ -229,7 +234,14 @@ class newHalo extends Command
 					$tags_model = new Collection;
 					foreach ($tags as $tag)
 					{
-						$tags_model[] = Tag::firstOrCreate(['tag' => $tag]);
+						$tags_model[] = Tag::firstOrCreate(['name' => $tag]);
+					}
+					foreach ($tags_model as $k => $v)
+					{
+						if (!$tags_model[$k]->save())
+						{
+							dd($tags_model[$k]->getErrors());
+						}
 					}
 
 					if (count($tags_model))
@@ -243,16 +255,13 @@ class newHalo extends Command
 					$news->websites()->sync([$website->id]);
 
 					// ----------------------------------------------------------------------------------------------------
-					// AUTHOR
+					// LOG
 					// ----------------------------------------------------------------------------------------------------
-					$news->authored()->attach(array_key_exists($x['author'], $users) ? $users[$x['author']]->id : $users['dita']->id, ['original_data' => json_encode([]), 'updated_data' => $news->toJson()]);
+					// $news->authored()->attach(array_key_exists($x['author'], $users) ? $users[$x['author']]->id : $users['dita']->id, ['original_data' => json_encode([]), 'updated_data' => $news->toJson()]);
 				}
-
-
 
 				// $news->websites()->associate($website);
 				// $news->save();
-
 			}
 		});
 

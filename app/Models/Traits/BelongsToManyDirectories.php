@@ -18,7 +18,7 @@ trait BelongsToManyDirectories {
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 	function directories()
 	{
-		return $this->belongsToMany(__NAMESPACE__ . '\Directory')
+		return $this->belongsToMany(__NAMESPACE__ . '\Directory');
 	}
 
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––

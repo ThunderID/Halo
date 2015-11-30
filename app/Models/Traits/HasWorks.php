@@ -4,32 +4,38 @@ namespace App\Models;
 
 use Illuminate\Support\MessageBag;
 
-trait HasImages {
+trait HasWorks {
 
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 	// BOOT
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	static function bootHasImages()
+	static function bootHasWorks()
 	{
-		Static::observe(new HasImagesObserver);
 	}
 
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 	// HasImage
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	function images()
+	function works()
 	{
-		return $this->morphMany(__NAMESPACE__ . '\Image', 'image');
+		return $this->belongsToMany(__NAMESPACE__ . '\Website', 'works', 'website_id', 'user_id')
+					->withPivot('start_at', 'end_at', 'role')
+					->withTimestamps();
+	}
+
+	function active_works()
+	{
+		return $this->belongsToMany(__NAMESPACE__ . '\Website', 'works', 'website_id', 'user_id')
+									->withPivot('start_at', 'end_at', 'role')
+									->withTimestamps()
+									->wherePivot('start_at', '<=', \Carbon\Carbon::now())
+									->WherePivot(function($q) { 
+											$q->where('end_at', '>=', \Carbon\Carbon::now())
+												->orwhereNull('end_at');
+									});
 	}
 
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 	// 
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	function getImage($name)
-	{
-		if ($this->images->count())
-		{
-			return $this->images->where('name', $name)->first();
-		}
-	}
 }

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Validator;
+
 class Image extends BaseModel
 {
 	use hasName;

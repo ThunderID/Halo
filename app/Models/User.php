@@ -14,7 +14,7 @@ class User extends BaseModel implements AuthenticatableContract,
 									AuthorizableContract,
 									CanResetPasswordContract
 {
-	use Authenticatable, Authorizable, CanResetPassword, HasName, HasImages, BelongsToManyContents;
+	use Authenticatable, Authorizable, CanResetPassword, HasName, HasImages, BelongsToManyContents, HasWorks;
 
 	protected $table = 'users';
 	protected $fillable = ['name', 'username', 'email', 'password'];

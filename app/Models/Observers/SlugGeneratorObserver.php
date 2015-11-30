@@ -1,22 +1,27 @@
 <?php
 
 namespace App\Models;
+use Validator;
 
 class SlugGeneratorObserver {
 
-	function creating($model)
+	function saving($model)
 	{
 		if (!$model->slug)
 		{
 			$class_name = get_class($model);
-			$static_property = new ReflectionProperty($class_name, 'name_field'); 
+			$static_property = new \ReflectionProperty($class_name, 'name_field'); 
 			$name_field = $static_property->getValue();
 
 			$i = 0;
 			do {
-				$model->slug = str_slug($model->$name_field . ($i ? ' ' . $i : ''));
+				$slug = strtolower(str_slug($model->$name_field . ($i ? ' ' . $i : '')));
+
+				$validator = Validator::make(['slug' => $slug], ['slug' => ['unique:' . $model->getTable() . ',slug']]);
 				$i++;
-			} while (!with(new $class_name)->slug($model->slug)->first()) 
+			} while ($validator->fails()); 
+
+			$model->slug = $slug;
 		}
 	}
 	

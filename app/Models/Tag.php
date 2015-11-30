@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+use Validator;
 
 class Tag extends BaseModel
 {

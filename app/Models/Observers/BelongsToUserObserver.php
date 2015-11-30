@@ -1,13 +1,14 @@
 <?php
 
 namespace App\Models;
+use Validator;
 
 class BelongsToUserObserver {
 
 	function saving($model)
 	{
-		$rules['user_id'] = ['exists' . with(new \App\Models\User)->getTable() . ',id'];
-		$validator = Validator::make($model->toArray, $rules);
+		$rules['user_id'] = ['exists:' . with(new \App\Models\User)->getTable() . ',id'];
+		$validator = Validator::make($model->toArray(), $rules);
 
 		if ($validator->fails())
 		{

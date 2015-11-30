@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use Validator;
+
 class Content extends BaseModel
 {
 	use HasName, HasSlug, HasImages, HasPublishedAt, Publishable, Taggable, BelongsToManyDirectories, BelongsToUser;
 
 	protected $fillable 	= 	[
-									'title', 'slug', 'summary', 'content', 'published_at'
+									'title', 'slug', 'summary', 'content', 'published_at', 'user_id'
 								]; 
 	protected $hidden		= [ ];
 	protected $dates		= [ 'created_at', 'deleted_at', 'published_at'];
@@ -47,7 +49,7 @@ class Content extends BaseModel
 	{
 		$rules['title']			= ['required'];
 		$rules['slug']			= ['required', 'unique:' . $model->getTable() . ',slug,' . $model->id ];
-		$rules['summary']		= ['required'];
+		$rules['summary']		= [''];
 		$rules['content']		= ['required'];
 		$rules['published_at']	= ['date'];
 

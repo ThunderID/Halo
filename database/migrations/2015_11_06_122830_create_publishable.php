@@ -12,7 +12,7 @@ class CreatePublishable extends Migration
      */
     public function up()
     {
-        Schema::create('publishable', function (Blueprint $table) {
+        Schema::create('publishables', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('website_id')->unsigned();
             $table->string('publishable_type');
@@ -30,6 +30,6 @@ class CreatePublishable extends Migration
      */
     public function down()
     {
-        Schema::drop('publishable');
+        Schema::drop('publishables');
     }
 }
