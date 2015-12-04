@@ -23,20 +23,20 @@ class LoginController extends Controller {
 
 	function postLogin()
 	{
-		$js = $this->dispatch(new Authenticate(Input::get('email'), Input::get('password'), true));
-		if ($js->isSuccess())
+		$credential = Input::only('email', 'password');
+		if (Auth::attempt($credential))
 		{
-			return redirect()->route('cms.dashboard');
+			return redirect()->route('cms.menu');
 		}
 		else
 		{
-			return redirect()->back()->withErrors($js->getData());
+			return redirect()->back();
 		}
 	}
 
 	function Logout()
 	{
-		$js = $this->dispatch(new Logout());
+		Auth::logout();
 		return redirect()->route('cms.login');
 	}
 

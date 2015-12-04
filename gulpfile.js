@@ -13,8 +13,14 @@ var elixir = require('laravel-elixir');
 
 elixir(function(mix) {
     mix.sass('cms.scss')
-		.scripts(['jquery.inputmask.bundle.js', 'redactor.js'], 'public/js/cms.js')
-    	.version(['public/css/cms.css', 'public/js/cms.js'])
+    	.sass('halomalang.scss')
+        .scripts(['jquery.inputmask.bundle.js', 'redactor.js'], 'public/js/cms.js')
+		.scripts(['jquery.min.js', 'bootstrap.min.js'], 'public/js/halomalang.js')
+    	.version(['public/css/cms.css', 
+    				'public/js/cms.js',
+                    'public/css/halomalang.css',
+	    			'public/js/halomalang.js'
+    			])
     	.copy('resources/assets/font', 'public/font')
     	.copy('resources/assets/plugins', 'public/plugins')
 		.copy('resources/assets/images', 'public/images');

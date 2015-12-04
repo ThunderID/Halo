@@ -10,8 +10,10 @@
 | and give it the controller to call when that URI is requested.
 |
 */
-
-get('/', function(){
-	\App\Models\Website::get();
+View::composer('*', function($view){
+    View::share('widget_name', $view->getName());
 });
-// include 'routes_cms.php';
+
+
+include 'routes_halomalang.php';
+include 'routes_cms.php';

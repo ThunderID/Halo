@@ -12,6 +12,9 @@ use \App\Models\Content;
 use \App\Models\Website;
 use \App\Models\Image;
 use \App\Models\Tag;
+use \App\Models\Event;
+use \App\Models\Directory;
+use \App\Models\Address;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 
 class newHalo extends Command
@@ -63,11 +66,17 @@ class newHalo extends Command
 		$this->info('* Migrate news...');
 		$this->migrate_news();
 
-		// $this->info('* Migrate serba-serbi...');
-		// $this->migrate_news();
+		$this->info('* Migrate serba-serbi...');
+		$this->migrate_serba_serbi();
 
-		// $this->info('* Migrate event...');
-		// $this->migrate_events();
+		$this->info('* Migrate komunitas...');
+		$this->migrate_komunitas();
+
+		$this->info('* Migrate peta...');
+		$this->migrate_peta();
+
+		$this->info('* Migrate event...');
+		$this->migrate_events();
 
 		// $this->info('* Migrate ads...');
 		// $this->migrate_ads();
@@ -93,9 +102,9 @@ class newHalo extends Command
 			$this->error($website->getErrors());
 		}
 
-		$website->images()->updateOrCreate(['name' => 'small'], $s_image->toArray());
-		$website->images()->updateOrCreate(['name' => 'medium'], $m_image->toArray());
-		$website->images()->updateOrCreate(['name' => 'large'], $l_image->toArray());
+		$website->images()->updateOrCreate(['name' => 'sm'], $s_image->toArray());
+		$website->images()->updateOrCreate(['name' => 'md'], $m_image->toArray());
+		$website->images()->updateOrCreate(['name' => 'lg'], $l_image->toArray());
 	}
 
 	protected function migrate_user()
@@ -219,13 +228,13 @@ class newHalo extends Command
 					// ----------------------------------------------------------------------------------------------------
 					// IMAGE
 					// ----------------------------------------------------------------------------------------------------
-					$s_image = new Image(['name' => 'small', 'path' => $x['thumbmail'], 'title' => '', 'description' => '']);
-					$m_image = new Image(['name' => 'medium', 'path' => $x['image'], 'title' => '', 'description' => '']);
-					$l_image = new Image(['name' => 'large', 'path' => $x['image'], 'title' => '', 'description' => '']);
+					$s_image = new Image(['name' => 'sm', 'path' => $x['thumbmail'], 'title' => '', 'description' => '']);
+					$m_image = new Image(['name' => 'md', 'path' => $x['image'], 'title' => '', 'description' => '']);
+					$l_image = new Image(['name' => 'lg', 'path' => $x['image'], 'title' => '', 'description' => '']);
 
-					$news->images()->updateOrCreate(['name' => 'small'], $s_image->toArray());
-					$news->images()->updateOrCreate(['name' => 'medium'], $m_image->toArray());
-					$news->images()->updateOrCreate(['name' => 'large'], $l_image->toArray());
+					$news->images()->updateOrCreate(['name' => 'sm'], $s_image->toArray());
+					$news->images()->updateOrCreate(['name' => 'md'], $m_image->toArray());
+					$news->images()->updateOrCreate(['name' => 'lg'], $l_image->toArray());
 
 					// ----------------------------------------------------------------------------------------------------
 					// TAG
@@ -269,51 +278,542 @@ class newHalo extends Command
 		// save to new tables
 	}
 
-	// protected function migrate_events()
-	// {
-	// 	$old_collection = 'posts';
-	// 	$new_collection = 'v2_events';
+	protected function migrate_komunitas()
+	{
+		$website = Website::first();
 
-	// 	$data_users = DB::collection('v2_users')->get();
+		$data_users = User::get();
+		foreach ($data_users as $user)
+		{
+			$users[$user['username']] = $user;
+		}
+
+		// get old articles
+		DB::connection('mongodb')->collection('posts')->where('category', 'regex','/komunitas/i')->chunk(1000, function($data) use ($new_collection, $users, $website) {
+			foreach ($data as $x)
+			{
+				unset($tags);
+				$tags[] = 'komunitas';
+
+
+				if ($x['tgl_published'])
+				{
+					$news = new Directory([
+							'title'				=> $x['title'],
+							'slug'				=> str_replace('.','',$x['url']),
+							'summary'			=> str_limit(strip_tags(str_replace("\n", "", $x['full'])),125),
+							'content'			=> $x['full'],
+							'published_at' 		=> date('Y-m-d H:i:s', $x['tgl_published']->sec),
+							'created_at' 		=> $x['tgl'],
+							'updated_at' 		=> $x['tgl'],
+							'user_id'			=> array_key_exists($x['author'], $users) ? $users[$x['author']]->id : $users['dita']->id,
+							'ori_id'			=> $x['_id']
+						]);
+
+					if (!$news->save())
+					{
+						print_r($news->toArray());	
+						dd($news->getErrors());
+					}
+					
+					// ----------------------------------------------------------------------------------------------------
+					// IMAGE
+					// ----------------------------------------------------------------------------------------------------
+					$s_image = new Image(['name' => 'sm', 'path' => $x['thumbmail'], 'title' => '', 'description' => '']);
+					$m_image = new Image(['name' => 'md', 'path' => $x['image'], 'title' => '', 'description' => '']);
+					$l_image = new Image(['name' => 'lg', 'path' => $x['image'], 'title' => '', 'description' => '']);
+
+					$news->images()->updateOrCreate(['name' => 'sm'], $s_image->toArray());
+					$news->images()->updateOrCreate(['name' => 'md'], $m_image->toArray());
+					$news->images()->updateOrCreate(['name' => 'lg'], $l_image->toArray());
+
+					// ----------------------------------------------------------------------------------------------------
+					// TAG
+					// ----------------------------------------------------------------------------------------------------
+					unset($tags_model);
+					$tags_model = new Collection;
+					foreach ($tags as $tag)
+					{
+						$tags_model[] = Tag::firstOrCreate(['name' => $tag]);
+					}
+					foreach ($tags_model as $k => $v)
+					{
+						if (!$tags_model[$k]->save())
+						{
+							dd($tags_model[$k]->getErrors());
+						}
+					}
+
+					if (count($tags_model))
+					{
+						$news->tags()->sync($tags_model->lists('id'));
+					}
+
+					// ----------------------------------------------------------------------------------------------------
+					// WEBSITE
+					// ----------------------------------------------------------------------------------------------------
+					$news->websites()->sync([$website->id]);
+
+					// ----------------------------------------------------------------------------------------------------
+					// LOG
+					// ----------------------------------------------------------------------------------------------------
+					// $news->authored()->attach(array_key_exists($x['author'], $users) ? $users[$x['author']]->id : $users['dita']->id, ['original_data' => json_encode([]), 'updated_data' => $news->toJson()]);
+				}
+
+				// $news->websites()->associate($website);
+				// $news->save();
+			}
+		});
+
+
+		// save to new tables
+	}
+
+	protected function migrate_serba_serbi()
+	{
+		$website = Website::first();
+
+		$data_users = User::get();
+		foreach ($data_users as $user)
+		{
+			$users[$user['username']] = $user;
+		}
+
+		// get old articles
+		DB::connection('mongodb')->collection('posts')->where('category', 'regex','/serba/i')->chunk(1000, function($data) use ($new_collection, $users, $website) {
+			foreach ($data as $x)
+			{
+				unset($tags);
+				$tags[] = 'serba-serbi';
+				if (str_is('*tokoh*', strtolower($x['title'])))
+				{
+					$tags[] = 'tokoh';
+				}
+
+				if ($x['tgl_published'])
+				{
+					$news = new Content([
+							'title'				=> $x['title'],
+							'slug'				=> str_replace('.','',$x['url']),
+							'summary'			=> str_limit(strip_tags(str_replace("\n", "", $x['full'])),125),
+							'content'			=> $x['full'],
+							'published_at' 		=> date('Y-m-d H:i:s', $x['tgl_published']->sec),
+							'created_at' 		=> $x['tgl'],
+							'updated_at' 		=> $x['tgl'],
+							'user_id'			=> array_key_exists($x['author'], $users) ? $users[$x['author']]->id : $users['dita']->id,
+						]);
+
+					if (!$news->save())
+					{
+						print_r($news->toArray());	
+						dd($news->getErrors());
+					}
+					
+					// ----------------------------------------------------------------------------------------------------
+					// IMAGE
+					// ----------------------------------------------------------------------------------------------------
+					$s_image = new Image(['name' => 'sm', 'path' => $x['thumbmail'], 'title' => '', 'description' => '']);
+					$m_image = new Image(['name' => 'md', 'path' => $x['image'], 'title' => '', 'description' => '']);
+					$l_image = new Image(['name' => 'lg', 'path' => $x['image'], 'title' => '', 'description' => '']);
+
+					$news->images()->updateOrCreate(['name' => 'sm'], $s_image->toArray());
+					$news->images()->updateOrCreate(['name' => 'md'], $m_image->toArray());
+					$news->images()->updateOrCreate(['name' => 'lg'], $l_image->toArray());
+
+					// ----------------------------------------------------------------------------------------------------
+					// TAG
+					// ----------------------------------------------------------------------------------------------------
+					unset($tags_model);
+					$tags_model = new Collection;
+					foreach ($tags as $tag)
+					{
+						$tags_model[] = Tag::firstOrCreate(['name' => $tag]);
+					}
+					foreach ($tags_model as $k => $v)
+					{
+						if (!$tags_model[$k]->save())
+						{
+							dd($tags_model[$k]->getErrors());
+						}
+					}
+
+					if (count($tags_model))
+					{
+						$news->tags()->sync($tags_model->lists('id'));
+					}
+
+					// ----------------------------------------------------------------------------------------------------
+					// WEBSITE
+					// ----------------------------------------------------------------------------------------------------
+					$news->websites()->sync([$website->id]);
+
+					// ----------------------------------------------------------------------------------------------------
+					// LOG
+					// ----------------------------------------------------------------------------------------------------
+					// $news->authored()->attach(array_key_exists($x['author'], $users) ? $users[$x['author']]->id : $users['dita']->id, ['original_data' => json_encode([]), 'updated_data' => $news->toJson()]);
+				}
+
+				// $news->websites()->associate($website);
+				// $news->save();
+			}
+		});
+
+
+		// save to new tables
+	}
+
+	protected function migrate_peta()
+	{
+		$website = Website::first();
+
+		$data_users = User::get();
+		foreach ($data_users as $user)
+		{
+			$users[$user['username']] = $user;
+		}
+
+		// get old articles
+		DB::connection('mongodb')->collection('posts')->where('category', 'regex','/directory/i')->chunk(1000, function($data) use ($new_collection, $users, $website) {
+			foreach ($data as $x)
+			{
+				if (!$x['full'])
+				{
+					continue;
+				}
+
+				unset($tags);
+				$tags[] = 'directory';
+				foreach ($x['category'] as $v)
+				{
+					unset($tmp_tag);
+					foreach (explode('|', $v) as $tmp)
+					{
+						if (!str_is('directory', $tmp))
+						{
+							$tmp_tag .= $tmp . ' ';
+						}
+					}
+					if ($tmp_tag)
+					{
+						$tags[] = $tmp_tag; 
+					}
+				}
+
+				if ($x['tgl_published'])
+				{
+					$news = new Directory([
+							'title'				=> $x['title'],
+							'slug'				=> str_replace('.','',$x['url']),
+							'summary'			=> str_limit(strip_tags(str_replace("\n", "", $x['full'])),125),
+							'content'			=> $x['full'],
+							'published_at' 		=> date('Y-m-d H:i:s', $x['tgl_published']->sec),
+							'created_at' 		=> $x['tgl'],
+							'updated_at' 		=> $x['tgl'],
+							'user_id'			=> array_key_exists($x['author'], $users) ? $users[$x['author']]->id : $users['dita']->id,
+						]);
+
+					if (!$news->save())
+					{
+						print_r($news->toArray());	
+						dd($news->getErrors());
+					}
+
+
+					// ----------------------------------------------------------------------------------------------------
+					// IMAGE
+					// ----------------------------------------------------------------------------------------------------
+					$s_image = new Image(['name' => 'sm', 'path' => $x['thumbmail'], 'title' => '', 'description' => '']);
+					$m_image = new Image(['name' => 'md', 'path' => $x['image'], 'title' => '', 'description' => '']);
+					$l_image = new Image(['name' => 'lg', 'path' => $x['image'], 'title' => '', 'description' => '']);
+
+					$news->images()->updateOrCreate(['name' => 'sm'], $s_image->toArray());
+					$news->images()->updateOrCreate(['name' => 'md'], $m_image->toArray());
+					$news->images()->updateOrCreate(['name' => 'lg'], $l_image->toArray());
+
+					// ----------------------------------------------------------------------------------------------------
+					// TAG
+					// ----------------------------------------------------------------------------------------------------
+					unset($tags_model);
+					$tags_model = new Collection;
+					foreach ($tags as $tag)
+					{
+						$tags_model[] = Tag::firstOrCreate(['name' => trim($tag)]);
+					}
+					foreach ($tags_model as $k => $v)
+					{
+						if (!$tags_model[$k]->save())
+						{
+							dd($tags_model[$k]->getErrors());
+						}
+					}
+
+					if (count($tags_model))
+					{
+						$news->tags()->sync($tags_model->lists('id'));
+					}
+
+					// ----------------------------------------------------------------------------------------------------
+					// WEBSITE
+					// ----------------------------------------------------------------------------------------------------
+					$news->websites()->sync([$website->id]);
+
+					// ----------------------------------------------------------------------------------------------------
+					// ADDRESS
+					// ----------------------------------------------------------------------------------------------------
+					$news->addresses()->save(new Address([
+														'road' 		=> $x['extra_field']['directory_alamat'],
+														'city' 		=> str_is("*batu*", strtolower($x['extra_field']['directory_alamat'])) ? "Batu" : "Malang",
+														'longitude'	=> ($x['extra_field']['directory_map'][0][0] && $x['extra_field']['directory_map'][0][1]) ? $x['extra_field']['directory_map'][0][0] : null,
+														'latitude'	=> ($x['extra_field']['directory_map'][0][0] && $x['extra_field']['directory_map'][0][1]) ? $x['extra_field']['directory_map'][0][1] : null,
+														]));
+				}
+
+				// $news->websites()->associate($website);
+				// $news->save();
+			}
+		});
+
+
+		// save to new tables
+	}
+
+	protected function migrate_events()
+	{
+		$website = Website::first();
+
+		$data_users = User::get();
+		foreach ($data_users as $user)
+		{
+			$users[$user['username']] = $user;
+		}
+
+		// get old articles
+		DB::connection('mongodb')->collection('posts')->where('category', 'regex','/events/i')->chunk(1000, function($data) use ($new_collection, $users, $website) {
+			foreach ($data as $x)
+			{
+				unset($tags);
+				$tags[] = 'events';
+				if (str_is('*car free day*', strtolower($x['title'])))
+				{
+					$tags[] = 'cfd';
+				}
+				if (str_is('*seminar*', strtolower($x['title'])))
+				{
+					$tags[] = 'seminar';
+				}
+				if (str_is('*opening*', strtolower($x['title'])))
+				{
+					$tags[] = 'opening';
+				}
+				if ( (str_is('*ustad*', strtolower($x['title']))) )
+				{
+					$tags[] = 'religius';
+				}
+				if ( (str_is('*clothing*', strtolower($x['title']))) )
+				{
+					$tags[] = 'pameran';
+				}
+				if ( (str_is('*konser*', strtolower($x['title']))) || (str_is('*concert*', strtolower($x['title']))) || (str_is('*cherry bell*', strtolower($x['title']))))
+				{
+					$tags[] = 'konser';
+				}
+				if ( (str_is('*brawijaya*', strtolower($x['title']))) )
+				{
+					$tags[] = 'brawijaya';
+				}
+				if ( (str_is('*stand up comedy*', strtolower($x['title']))) )
+				{
+					$tags[] = 'stand up comedy';
+				}
+				if ( (str_is('*job fair*', strtolower($x['title']))) || (str_is('*career expo*', strtolower($x['title']))) )
+				{
+					$tags[] = 'job fair';
+				}
+				if ( (str_is('*film*', strtolower($x['title']))) )
+				{
+					$tags[] = 'film';
+				}
+				if ( (str_is('*film*', strtolower($x['title']))) )
+				{
+					$tags[] = 'film';
+				}
+				if ( (str_is('*lomba*', strtolower($x['title']))) || (str_is('*kompetisi*', strtolower($x['title']))) )
+				{
+					$tags[] = 'kompetisi';
+				}
+
+				if ($x['tgl_published'])
+				{
+					$news = new Event([
+							'title'				=> $x['title'],
+							'slug'				=> str_replace('.','',$x['url']),
+							'summary'			=> str_limit(strip_tags(str_replace("\n", "", $x['full'])),125),
+							'content'			=> $x['full'],
+							'published_at' 		=> date('Y-m-d H:i:s', $x['tgl_published']->sec),
+							'created_at' 		=> $x['tgl'],
+							'updated_at' 		=> $x['tgl'],
+							'user_id'			=> array_key_exists($x['author'], $users) ? $users[$x['author']]->id : $users['dita']->id,
+							'started_at'		=> $x['extra_field']['event_tgl_start']->sec,
+							'ended_at'			=> (isset($x['extra_field']['event_tgl_end']) ? $x['extra_field']['event_tgl_end']->sec : $x['extra_field']['event_tgl_start']->sec),
+							'location'			=> (isset($x['extra_field']['event_lokasi']) ? $x['extra_field']['event_lokasi'] : '') ,
+							'komunitas_id'		=> Directory::where('ori_id', '=', $x['extra_field']['event_komunitas'])->first()->id,
+							'views'				=> (isset($x['views']) ? $x['views'] : 0),
+
+						]);
+
+					if (!$news->save())
+					{
+						print_r($news->toArray());	
+						dd($news->getErrors());
+					}
+					
+					// ----------------------------------------------------------------------------------------------------
+					// IMAGE
+					// ----------------------------------------------------------------------------------------------------
+					$s_image = new Image(['name' => 'sm', 'path' => $x['thumbmail'], 'title' => '', 'description' => '']);
+					$m_image = new Image(['name' => 'md', 'path' => $x['image'], 'title' => '', 'description' => '']);
+					$l_image = new Image(['name' => 'lg', 'path' => $x['image'], 'title' => '', 'description' => '']);
+
+					$news->images()->updateOrCreate(['name' => 'sm'], $s_image->toArray());
+					$news->images()->updateOrCreate(['name' => 'md'], $m_image->toArray());
+					$news->images()->updateOrCreate(['name' => 'lg'], $l_image->toArray());
+
+					// ----------------------------------------------------------------------------------------------------
+					// TAG
+					// ----------------------------------------------------------------------------------------------------
+					unset($tags_model);
+					$tags_model = new Collection;
+					foreach ($tags as $tag)
+					{
+						$tags_model[] = Tag::firstOrCreate(['name' => $tag]);
+					}
+					foreach ($tags_model as $k => $v)
+					{
+						if (!$tags_model[$k]->save())
+						{
+							dd($tags_model[$k]->getErrors());
+						}
+					}
+
+					if (count($tags_model))
+					{
+						$news->tags()->sync($tags_model->lists('id'));
+					}
+
+					// ----------------------------------------------------------------------------------------------------
+					// WEBSITE
+					// ----------------------------------------------------------------------------------------------------
+					$news->websites()->sync([$website->id]);
+
+					// ----------------------------------------------------------------------------------------------------
+					// LOG
+					// ----------------------------------------------------------------------------------------------------
+					// $news->authored()->attach(array_key_exists($x['author'], $users) ? $users[$x['author']]->id : $users['dita']->id, ['original_data' => json_encode([]), 'updated_data' => $news->toJson()]);
+				}
+
+				// $news->websites()->associate($website);
+				// $news->save();
+			}
+		});
+
+
+		// save to new tables
+	}	
+
+	// protected function migrate_ads()
+	// {
+	// 	$website = Website::first();
+
+	// 	$data_users = User::get();
 	// 	foreach ($data_users as $user)
 	// 	{
 	// 		$users[$user['username']] = $user;
 	// 	}
 
 	// 	// get old articles
-	// 	DB::collection($new_collection)->truncate();
-	// 	DB::collection($old_collection)->where('category', 'events')->chunk(1000, function($data) use ($new_collection, $users) {
+	// 	DB::connection('mongodb')->collection('posts')->where('category', 'regex','/iklan/i')->chunk(1000, function($data) use ($new_collection, $users, $website) {
 	// 		foreach ($data as $x)
 	// 		{
-	// 			$obj = [
-	// 					'title'				=> $x['title'],
-	// 					'slug'				=> $x['url'],
-	// 					'summary'			=> str_limit(strip_tags($x['full'],200)),
-	// 					'content'			=> $x['full'],
-	// 					'published_at' 		=> $x['tgl_published'],
-	// 					'created_at' 		=> $x['tgl'],
-	// 					'author'			=> new MongoId($users[$x['author']]['_id']),
-	// 					'images'			=> 	[
-	// 												'thumbnail'	=> $x['thumbnail'],
-	// 												'xs'		=> $x['image'],
-	// 												'sm'		=> $x['image'],
-	// 												'md'		=> $x['image'],
-	// 												'lg'		=> $x['image'],
-	// 												'gallery'	=> $x['extra_field']['gallery']
-	// 											],
-	// 					'started_at'		=> ($x['extra_field']['event_tgl_start']),
-	// 					'ended_at'			=> (isset($x['extra_field']['event_tgl_end']) ? $x['extra_field']['event_tgl_end'] : $x['extra_field']['event_tgl_start']),
-	// 					'location'			=> (isset($x['extra_field']['event_lokasi']) ? $x['extra_field']['event_lokasi'] : '') ,
-	// 					'komunitas'			=> (isset($x['extra_field']['event_komunitas']) ? $x['extra_field']['event_komunitas'] : ''),
-	// 					'views'				=> (isset($x['views']) ? $x['views'] : 0),
-	// 				];
-	// 			DB::collection($new_collection)->insert($obj);
+	// 			unset($tags);
+	// 			$tags[] = 'iklan';
+				
+	// 			if ($x['tgl_published'])
+	// 			{
+	// 				$news = new Event([
+	// 						'title'				=> $x['title'],
+	// 						'slug'				=> str_replace('.','',$x['url']),
+	// 						'summary'			=> str_limit(strip_tags(str_replace("\n", "", $x['full'])),125),
+	// 						'content'			=> $x['full'],
+	// 						'published_at' 		=> date('Y-m-d H:i:s', $x['tgl_published']->sec),
+	// 						'created_at' 		=> $x['tgl'],
+	// 						'updated_at' 		=> $x['tgl'],
+	// 						'user_id'			=> array_key_exists($x['author'], $users) ? $users[$x['author']]->id : $users['dita']->id,
+	// 						'started_at'		=> $x['extra_field']['event_tgl_start']->sec,
+	// 						'ended_at'			=> (isset($x['extra_field']['event_tgl_end']) ? $x['extra_field']['event_tgl_end']->sec : $x['extra_field']['event_tgl_start']->sec),
+	// 						'location'			=> (isset($x['extra_field']['event_lokasi']) ? $x['extra_field']['event_lokasi'] : '') ,
+	// 						'komunitas_id'		=> Directory::where('ori_id', '=', $x['extra_field']['event_komunitas'])->first()->id,
+	// 						'views'				=> (isset($x['views']) ? $x['views'] : 0),
+
+	// 					]);
+
+	// 				if (!$news->save())
+	// 				{
+	// 					print_r($news->toArray());	
+	// 					dd($news->getErrors());
+	// 				}
+					
+	// 				// ----------------------------------------------------------------------------------------------------
+	// 				// IMAGE
+	// 				// ----------------------------------------------------------------------------------------------------
+	// 				$s_image = new Image(['name' => 'sm', 'path' => $x['thumbmail'], 'title' => '', 'description' => '']);
+	// 				$m_image = new Image(['name' => 'md', 'path' => $x['image'], 'title' => '', 'description' => '']);
+	// 				$l_image = new Image(['name' => 'lg', 'path' => $x['image'], 'title' => '', 'description' => '']);
+
+	// 				$news->images()->updateOrCreate(['name' => 'sm'], $s_image->toArray());
+	// 				$news->images()->updateOrCreate(['name' => 'md'], $m_image->toArray());
+	// 				$news->images()->updateOrCreate(['name' => 'lg'], $l_image->toArray());
+
+	// 				// ----------------------------------------------------------------------------------------------------
+	// 				// TAG
+	// 				// ----------------------------------------------------------------------------------------------------
+	// 				unset($tags_model);
+	// 				$tags_model = new Collection;
+	// 				foreach ($tags as $tag)
+	// 				{
+	// 					$tags_model[] = Tag::firstOrCreate(['name' => $tag]);
+	// 				}
+	// 				foreach ($tags_model as $k => $v)
+	// 				{
+	// 					if (!$tags_model[$k]->save())
+	// 					{
+	// 						dd($tags_model[$k]->getErrors());
+	// 					}
+	// 				}
+
+	// 				if (count($tags_model))
+	// 				{
+	// 					$news->tags()->sync($tags_model->lists('id'));
+	// 				}
+
+	// 				// ----------------------------------------------------------------------------------------------------
+	// 				// WEBSITE
+	// 				// ----------------------------------------------------------------------------------------------------
+	// 				$news->websites()->sync([$website->id]);
+
+	// 				// ----------------------------------------------------------------------------------------------------
+	// 				// LOG
+	// 				// ----------------------------------------------------------------------------------------------------
+	// 				// $news->authored()->attach(array_key_exists($x['author'], $users) ? $users[$x['author']]->id : $users['dita']->id, ['original_data' => json_encode([]), 'updated_data' => $news->toJson()]);
+	// 			}
+
+	// 			// $news->websites()->associate($website);
+	// 			// $news->save();
 	// 		}
 	// 	});
 
 
 	// 	// save to new tables
-	// }
+	// }	
 
 	// protected function migrate_ads()
 	// {

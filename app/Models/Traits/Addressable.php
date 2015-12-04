@@ -16,7 +16,7 @@ trait Addressable {
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 	// RELATIONS
 	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-	function addressable()
+	function addresses()
 	{
 		return $this->morphMany(__NAMESPACE__ . '\Address', 'addressable');
 	}

@@ -31,4 +31,13 @@ trait HasName {
 			return $q->where(Static::$name_field, 'like', str_replace('*', '%', $v));
 		}
 	}
+
+	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+	// ACCESSOR
+	// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+	// public function getNameAttribute()
+	// {
+	// 	$name_field = Static::$name_field;
+	// 	return $this->$name_field;
+	// }
 }

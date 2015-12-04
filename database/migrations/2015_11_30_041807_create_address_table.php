@@ -15,11 +15,11 @@ class CreateAddressTable extends Migration
         Schema::create('addresses', function (Blueprint $table) {
             $table->increments('id');
             $table->string('addressable_type');
-            $table->integer('addressable_id')->integer;
+            $table->integer('addressable_id')->unsigned();
             $table->string('road');
             $table->string('city');
-            $table->double('latitude');
-            $table->double('longitude');
+            $table->double('latitude')->nullable();
+            $table->double('longitude')->nullable();
             $table->timestamps();
 
             $table->index(['addressable_type', 'addressable_id']);

@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use Validator;
+
 class Directory extends BaseModel
 {
 	use HasName, HasSlug, HasImages, HasPublishedAt, Publishable, Addressable, Taggable, BelongsToManyContents, BelongsToUser;
 
 	protected $fillable 	= 	[
-									'title', 'slug', 'summary', 'content', 'published_at'
+									'title', 'slug', 'summary', 'content', 'published_at', 'user_id', 'ori_id'
 								]; 
 	protected $hidden		= [ ];
 	protected $dates		= [ 'created_at', 'deleted_at', 'published_at'];

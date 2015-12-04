@@ -7,7 +7,7 @@ class SlugGeneratorObserver {
 
 	function saving($model)
 	{
-		if (!$model->slug)
+		if (!$model->id)
 		{
 			$class_name = get_class($model);
 			$static_property = new \ReflectionProperty($class_name, 'name_field'); 
@@ -15,7 +15,7 @@ class SlugGeneratorObserver {
 
 			$i = 0;
 			do {
-				$slug = strtolower(str_slug($model->$name_field . ($i ? ' ' . $i : '')));
+				$slug = strtolower(str_slug($model->$name_field . ($i > 0 ? ' ' . $i : '')));
 
 				$validator = Validator::make(['slug' => $slug], ['slug' => ['unique:' . $model->getTable() . ',slug']]);
 				$i++;

@@ -14,10 +14,12 @@ class CreateDirectoryTable extends Migration
     {
         Schema::create('directories', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('user_id')->unsigned();
             $table->string('title');
             $table->string('slug');
             $table->text('summary');
             $table->text('content');
+            $table->string('ori_id')->nullable();
             $table->timestamp('published_at');
             $table->timestamps();
 

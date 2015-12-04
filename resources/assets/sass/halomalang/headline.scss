@@ -1,0 +1,33 @@
+.headline-container { 
+	background:$brand-primary;
+	padding: 30px 0;
+	.headline-item { 
+		a { 
+			position:relative;
+			img { 
+				width: 100%;
+			}
+			.caption { 
+				position:absolute;
+				bottom:0px;
+				left:0px; 
+				right:0px;
+				background: rgba(0,0,0,0.4);
+				color:white;
+				font-size:$font-size-h3;
+				padding:10px; 
+			}
+			&:hover { 
+				.caption { 
+					background: black;
+					-webkit-transition: all .25s ease;
+					-moz-transition: all .25s ease;
+					-ms-transition: all .25s ease;
+					-o-transition: all .25s ease;
+					transition: all .25s ease;
+				}
+			}
+
+		}
+	}
+}

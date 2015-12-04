@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use Validator;
+
 class Address extends BaseModel
 {
 	use HasImages;
     //
-	protected $table = 'images';
 	protected $fillable = [
 							'road',
 							'city',
