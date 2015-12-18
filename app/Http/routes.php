@@ -17,3 +17,4 @@ View::composer('*', function($view){
 
 include 'routes_halomalang.php';
 include 'routes_cms.php';
+include 'routes_api.php';
